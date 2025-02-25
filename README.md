@@ -1,57 +1,120 @@
-Auto Checkin & Auto some Task Infinity Ground
+# 🎉 **Auto Daily Airdrop Bot** 🎉
 
-use bearer token
+**Automate your daily check-ins, tasks, and claims for multiple platforms with ease!**  
+This script will help you get daily rewards from multiple platforms including **Infinity Ground, Lasso, Klok AI**, and **Zaros** with minimal effort!
 
-npm install fs axios
+---
 
-nano token.txt
+## 🧩 Features
+- ✅ **Auto Check-in & Task Completion** for Infinity Ground
+- 🎮 **Auto Play Lasso & Claim MON**
+- 🤖 **Automate Tasks with Klok AI**
+- 💰 **Zaros Daily Check-in** with Wallet Integration
 
-node infinity.js
+---
 
+## 🚀 Installation
 
-AUTO PLAY LASSO AND CLAIM MON
+### 1️⃣ Prerequisites
+- Make sure you have **Node.js** installed. If not, you can download it [here](https://nodejs.org/).
 
-Use Bearer token + Wallet PK
+### 2️⃣ Clone the Repository
 
-npm install axios ethers fs node-cron
+```bash
+git clone https://github.com/okeeajah/auto-daily-airdrop.git
+cd auto-daily-airdrop
+```
 
-nano pk.txt
+### 3️⃣ Install Dependencies
 
-nano token.txt
+```bash
+npm install fs axios ethers path node-cron
+```
 
-node dusted.js
+---
 
+## 🏃‍♂️ How to Use
 
-Auto chat klok ai
+### 🔹 **Infinity Ground Auto Check-in**
+1. Set your **Bearer Token**:
 
-use session token
-F12 - Aplication - Localstorage - Session
+   ```bash
+   nano token.txt
+   ```
 
-npm install axios uuid fs
+2. Run the script:
 
-nano token.txt
+   ```bash
+   node infinity.js
+   ```
 
-node klok.js
+### 🔹 **Auto Play Lasso & Claim MON**
+1. Add your **Wallet Private Key**:
 
+   ```bash
+   nano pk.txt
+   ```
 
-ZAROS DAILY CHECK-IN
+2. Run the script:
 
-Use session id token and accountId and wallet address :
+   ```bash
+   node dusted.js
+   ```
 
-sessionID =F12 - Local Storage
+### 🔹 **Klok AI Automation**
+1. Extract the **Session Token** from the browser (press `F12`, go to **Application > LocalStorage**, and copy the session token).
 
-AccountID = Trading Account#(YOUR ACCOUNT ID) ex : Trading Account#8930
+2. Save it in `token.txt`:
 
-nano config.json
+   ```bash
+   nano token.txt
+   ```
 
-Config.json format ⬇️
-{
-  "baseUrl": "https://production.api.zaros.fi",
-  "accountId": "8xxx",
-  "walletAddress": "WALLETADDREESS",
-  "sessionToken": "your-session-token-here"
-}
+3. Run the script:
 
-npm install axios fs path
+   ```bash
+   node klok.js
+   ```
 
-node zaros.js
+### 🔹 **Zaros Daily Check-in**
+1. Open your browser DevTools (`F12`), navigate to **LocalStorage**, and extract:
+   - **sessionID**
+   - **accountID**
+   - **walletAddress**
+
+2. Create the **config.json** file:
+
+   ```bash
+   nano config.json
+   ```
+
+3. Add the following format to the file:
+
+   ```json
+   {
+     "baseUrl": "https://production.api.zaros.fi",
+     "accountId": "8xxx",
+     "walletAddress": "YOUR_WALLET_ADDRESS",
+     "sessionToken": "YOUR_SESSION_TOKEN"
+   }
+   ```
+
+4. Run the script:
+
+   ```bash
+   node zaros.js
+   ```
+
+---
+
+## 💡 Contributing
+Feel free to fork this repo and create a **pull request** with your improvements!
+
+---
+
+## 📜 License
+This project is licensed under the **MIT License**.
+
+---
+
+**Happy automating!** 🚀
