@@ -10,6 +10,7 @@ This script will help you get **daily rewards** from multiple platforms includin
 ✅ **🔄 Auto Check-in & Task Completion** for **Infinity Ground**  
 ✅ **🎮 Auto Play Lasso & Claim MON**  
 ✅ **🤖 Automate Tasks** with **Klok AI**  
+✅ **💼 Zaros Daily Check-in with Wallet Integration**  
 ✅ **🛠️ Run scripts in the background using `screen` on VPS**  
 
 ---
@@ -124,6 +125,50 @@ npm install fs axios ethers path node-cron
 
    ```bash
    node klok.js  
+   ```
+
+---
+
+### **🔹 Zaros Daily Check-in 💼**  
+1️⃣ **Navigate to the Zaros folder**:  
+
+   ```bash
+   cd zaros  
+   ```
+
+2️⃣ **Start a new `screen` session**:  
+
+   ```bash
+   screen -S zaros  
+   ```
+
+3️⃣ **Set up your session token, account ID, and wallet address**:  
+
+   ```bash
+   nano config.json  
+   ```
+
+4️⃣ **Use the following format for `config.json`**:  
+
+   ```json
+   {
+     "baseUrl": "https://production.api.zaros.fi",
+     "accountId": "8xxx",
+     "walletAddress": "WALLETADDREESS",
+     "sessionToken": "your-session-token-here"
+   }
+   ```
+
+5️⃣ **Install dependencies**:  
+
+   ```bash
+   npm install axios fs path  
+   ```
+
+6️⃣ **Run the script**:  
+
+   ```bash
+   node zaros.js  
    ```
 
 ---
