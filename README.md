@@ -1,205 +1,155 @@
-# 🎉 **Auto Daily Airdrop Bot** 🎉
+# 🎉🚀 Auto Daily Airdrop Bot 🔥💰  
 
-**Automate your daily check-ins, tasks, and claims for multiple platforms with ease!**  
-This script will help you get daily rewards from multiple platforms including **Infinity Ground, Lasso, Klok AI**, and **Zaros** with minimal effort!
-
----
-
-## 🧩 Features
-- ✅ **Auto Check-in & Task Completion** for Infinity Ground
-- 🎮 **Auto Play Lasso & Claim MON**
-- 🤖 **Automate Tasks with Klok AI**
-- 💰 **Zaros Daily Check-in** with Wallet Integration
-- 🔄 **Run scripts in the background using `screen` on VPS**
+Automate your daily check-ins, tasks, and claims for multiple platforms with ease!  
+This script will help you get **daily rewards** from multiple platforms including **Infinity Ground, Lasso, Klok AI**, and **Zaros** with minimal effort! 🎯🎯  
 
 ---
 
-## 🚀 Installation
+## ✨🚀 Features  
 
-### 1️⃣ Prerequisites
-- Make sure you have **Node.js** installed. If not, you can download it [here](https://nodejs.org/).
-- Install **screen** on your VPS (if not installed):
+✅ **🔄 Auto Check-in & Task Completion** for **Infinity Ground**  
+✅ **🎮 Auto Play Lasso & Claim MON**  
+✅ **🤖 Automate Tasks** with **Klok AI**  
+✅ **🛠️ Run scripts in the background using `screen` on VPS**  
 
-  ```bash
-  sudo apt install screen -y  # Ubuntu/Debian
-  sudo yum install screen -y  # CentOS/RHEL
-  ```
+---
 
-### 2️⃣ Clone the Repository
+## 🛠️ Installation  
 
-```bash
-git clone https://github.com/okeeajah/auto-daily-airdrop.git
-cd auto-daily-airdrop
-```
+### **1️⃣ Prerequisites**  
+⚡ Make sure you have **Node.js** installed. If not, you can download it **[here](https://nodejs.org/)**.  
 
-### 3️⃣ Install Dependencies
+💾 Install `screen` on your VPS (if not installed):  
 
 ```bash
-npm install fs axios ethers path node-cron
+sudo apt install screen -y  # Ubuntu/Debian 🐧
+sudo yum install screen -y  # CentOS/RHEL 🔥
 ```
 
 ---
 
-## 🏃‍♂️ How to Use (with `screen`)
+### **2️⃣ Clone the Repository**  
 
-### 🔹 **Infinity Ground Auto Check-in**
-1. Set your **Bearer Token**:
+```bash
+git clone https://github.com/okeeajah/auto-daily-airdrop.git  
+cd auto-daily-airdrop  
+```
+
+---
+
+### **3️⃣ Install Dependencies**  
+
+```bash
+npm install fs axios ethers path node-cron  
+```
+
+---
+
+## 🚀 How to Use (with `screen`)  
+
+### **🔹 Infinity Ground Auto Check-in ⏳**  
+1️⃣ **Navigate to the Infinity Ground folder**:  
 
    ```bash
-   nano token.txt
+   cd infinity  
    ```
 
-2. Start a new screen session:
+2️⃣ **Start a new `screen` session**:  
 
    ```bash
-   screen -S infinity
+   screen -S infinity  
    ```
 
-3. Run the script:
+3️⃣ **Set your Bearer Token**:  
 
    ```bash
-   node infinity.js
+   nano token.txt  
    ```
 
-4. Detach from screen (so it runs in the background):  
-   Press `CTRL + A`, then `D`
-
-5. To reattach the screen:
+4️⃣ **Run the script**:  
 
    ```bash
-   screen -r infinity
+   node infinity.js  
    ```
 
 ---
 
-### 🔹 **Auto Play Lasso & Claim MON**
-1. Add your **Wallet Private Key**:
+### **🔹 Auto Play Lasso & Claim MON 🎮**  
+1️⃣ **Navigate to the Lasso folder**:  
 
    ```bash
-   nano pk.txt
+   cd dusted  
    ```
 
-2. Start a new screen session:
+2️⃣ **Start a new `screen` session**:  
 
    ```bash
-   screen -S lasso
+   screen -S lasso  
    ```
 
-3. Run the script:
+3️⃣ **Set up your Wallet Private Key**:  
 
    ```bash
-   node dusted.js
+   nano pk.txt  
    ```
 
-4. Detach from screen: `CTRL + A`, then `D`
-
-5. Reattach:
+4️⃣ **Run the script**:  
 
    ```bash
-   screen -r lasso
+   node dusted.js  
    ```
 
 ---
 
-### 🔹 **Klok AI Automation**
-1. Extract the **Session Token** from the browser (press `F12`, go to **Application > LocalStorage**, and copy the session token).
-
-2. Save it in `token.txt`:
+### **🔹 Automate Tasks with Klok AI 🤖**  
+1️⃣ **Navigate to the Klok AI folder**:  
 
    ```bash
-   nano token.txt
+   cd klok  
    ```
 
-3. Start a new screen session:
+2️⃣ **Start a new `screen` session**:  
 
    ```bash
-   screen -S klok
+   screen -S klok  
    ```
 
-4. Run the script:
+3️⃣ **Set up your Session Token**:  
 
    ```bash
-   node klok.js
+   nano token.txt  
    ```
 
-5. Detach from screen: `CTRL + A`, then `D`
-
-6. Reattach:
+4️⃣ **Run the script**:  
 
    ```bash
-   screen -r klok
+   node klok.js  
    ```
 
 ---
 
-### 🔹 **Zaros Daily Check-in**
-1. Open your browser DevTools (`F12`), navigate to **LocalStorage**, and extract:
-   - **sessionID**
-   - **accountID**
-   - **walletAddress**
+## ✅ Tips & Tricks 💡  
+🟢 **Exit screen session**:  
+   - Tekan **Ctrl + A**, lalu **D** (detach session).  
 
-2. Create the **config.json** file:
-
+🟢 **Reopen screen session**:  
    ```bash
-   nano config.json
+   screen -r infinity  # Ganti "infinity" dengan nama session yang sesuai  
    ```
 
-3. Add the following format to the file:
-
-   ```json
-   {
-     "baseUrl": "https://production.api.zaros.fi",
-     "accountId": "8xxx",
-     "walletAddress": "YOUR_WALLET_ADDRESS",
-     "sessionToken": "YOUR_SESSION_TOKEN"
-   }
+🟢 **Check all running screen sessions**:  
+   ```bash
+   screen -ls  
    ```
 
-4. Start a new screen session:
-
+🟢 **Terminate a screen session**:  
    ```bash
-   screen -S zaros
-   ```
-
-5. Run the script:
-
-   ```bash
-   node zaros.js
-   ```
-
-6. Detach from screen: `CTRL + A`, then `D`
-
-7. Reattach:
-
-   ```bash
-   screen -r zaros
+   screen -X -S infinity quit  # Ganti "infinity" dengan nama session yang ingin dihentikan  
    ```
 
 ---
 
-## 🔥 Managing `screen` Sessions
-- **List all running screen sessions**:
+🔥 **Now you're ready to automate your daily airdrops like a pro!** 🚀  
+💰 **Earn rewards effortlessly & maximize your profits!** 💎💸  
 
-  ```bash
-  screen -ls
-  ```
-
-- **Kill a screen session** (replace `session_name` with the actual name):
-
-  ```bash
-  screen -X -S session_name quit
-  ```
-
----
-
-## 💡 Contributing
-Feel free to fork this repo and create a **pull request** with your improvements!
-
----
-
-## 📜 License
-This project is licensed under the **MIT License**.
-
----
-
-**Happy automating!** 🚀
+📌 **Star this repo if you find it useful!** ⭐
