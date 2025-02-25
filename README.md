@@ -8,7 +8,7 @@ This script will help you get **daily rewards** from multiple platforms includin
 ## ✨🚀 Features  
 
 ✅ **🔄 Auto Check-in & Task Completion** for **Infinity Ground**  
-✅ **🎮 Auto Play Lasso & Claim MON**  
+✅ **🎮 Auto Play Lasso & Claim MON** (Uses Bearer Token + Wallet PK)  
 ✅ **🤖 Automate Tasks** with **Klok AI**  
 ✅ **💼 Zaros Daily Check-in with Wallet Integration**  
 ✅ **🛠️ Run scripts in the background using `screen` on VPS**  
@@ -94,7 +94,19 @@ npm install fs axios ethers path node-cron
    nano pk.txt  
    ```
 
-4️⃣ **Run the script**:  
+4️⃣ **Set up your Bearer Token**:  
+
+   ```bash
+   nano token.txt  
+   ```
+
+5️⃣ **Install dependencies** (if not installed):  
+
+   ```bash
+   npm install axios ethers fs node-cron  
+   ```
+
+6️⃣ **Run the script**:  
 
    ```bash
    node dusted.js  
@@ -159,7 +171,7 @@ npm install fs axios ethers path node-cron
    }
    ```
 
-5️⃣ **Install dependencies**:  
+5️⃣ **Install dependencies** (if not installed):  
 
    ```bash
    npm install axios fs path  
