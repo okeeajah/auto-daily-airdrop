@@ -122,7 +122,7 @@ async function processToken(token) {
                             await claimTask(api, taskId);
                             await sleep(2000);
                             console.log(`Task ${taskName} claimed successfully!`);
-                        } else if (taskStatus === 0 && ["Follow X", "Explore the Ground and play a game", "Join Telegram Announcement", "Join Telegram Community", "Share a meme", "Share with your friends", "Quote tweet & tag 3 frens", "Share on X", "Like @Infinityg_ai's tweet"].includes(taskName)) {
+                        } else if (taskStatus === 0 && ["Follow X", "Explore the Ground and play a game", "Join Telegram Announcement", "Join Telegram Community", "Share a meme", "Share with your friends", "Quote tweet & tag 3 frens", "Share on X", "Like @Infinityg_ai's tweet", "Fill out the feedback form"].includes(taskName)) {
                             console.log(`Pressing GO! and claiming task: ${taskName} (ID: ${taskId})`);
                             await completeTask(api, taskId);
                             await sleep(2000);
