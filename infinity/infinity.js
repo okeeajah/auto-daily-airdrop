@@ -1,138 +1,217 @@
 const fs = require('fs');
 const axios = require('axios');
-
-const token = fs.readFileSync('token.txt', 'utf8').trim();
-
-const api = axios.create({
-  baseURL: 'https://api.infinityg.ai/api/v1',
-  headers: {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
-    'Accept': '*/*',
-    'Origin': 'https://www.infinityg.ai',
-    'Referer': 'https://www.infinityg.ai/'
-  }
-});
+const chalk = require('chalk');
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Configuration
+const API_BASE_URL = 'https://api.infinityg.ai/api/v1';
+
+/**
+ * Formats the API response to standardize success messages.
+ */
 function formatResponse(response) {
-  if (response.code === '90000' && response.message === '成功') {
-    return {
-      ...response,
-      message: 'Success',
-      status: 'Operation completed successfully'
-    };
-  }
-  return response;
-}
-
-async function dailyCheckIn() {
-  try {
-    const response = await api.post('/task/checkIn/');
-    const formattedResponse = formatResponse(response.data);
-    console.log('Daily check-in:', formattedResponse);
-    return formattedResponse;
-  } catch (error) {
-    console.error('Check-in error:', error.response?.data || error.message);
-  }
-}
-
-async function getTaskList() {
-  try {
-    const response = await api.post('/task/list');
-    const formattedResponse = formatResponse(response.data);
-    console.log('Task list retrieved:', formattedResponse);
-    return formattedResponse;
-  } catch (error) {
-    console.error('Get task list error:', error.response?.data || error.message);
-  }
-}
-
-async function completeTask(taskId) {
-  try {
-    const response = await api.post('/task/complete', { taskId });
-    const formattedResponse = formatResponse(response.data);
-    console.log(`Task ${taskId} completed:`, formattedResponse);
-    return formattedResponse;
-  } catch (error) {
-    console.error(`Complete task ${taskId} error:`, error.response?.data || error.message);
-  }
-}
-
-async function claimTask(taskId) {
-  try {
-    const response = await api.post('/task/claim', { taskId });
-    const formattedResponse = formatResponse(response.data);
-    console.log(`Task ${taskId} claimed:`, formattedResponse);
-    return formattedResponse;
-  } catch (error) {
-    console.error(`Claim task ${taskId} error:`, error.response?.data || error.message);
-  }
-}
-
-async function runBot() {
-  try {
-    console.log('Starting InfinityG bot...');
-    
-    await dailyCheckIn();
-    await sleep(2000); 
-
-    const taskList = await getTaskList();
-    await sleep(2000);
-    
-    const taskIds = [8, 15, 7];
-    
-    for (const taskId of taskIds) {
-      await completeTask(taskId);
-      await sleep(2000);
-      
-      await claimTask(taskId);
-      await sleep(2000);
+    if (response.code === '90000' && response.message === '成功') {
+        return {
+            ...response,
+            message: 'Success',
+            status: 'Operation completed successfully'
+        };
     }
-    
-    console.log('Bot tasks completed successfully');
-  } catch (error) {
-    console.error('Bot error:', error);
-  }
+    return response;
 }
 
-function getTimeUntilNextRun() {
-  const now = new Date();
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 1, 0, 0); 
-  return tomorrow - now;
+/**
+ * Performs the daily check-in task.
+ */
+async function dailyCheckIn(api) {
+    try {
+        const response = await api.post('/task/checkIn/');
+        const formattedResponse = formatResponse(response.data);
+        console.log(chalk.blue('[INFO] 🔹 Melakukan check-in harian...'));
+        console.log(chalk.green('[SUCCESS] ✅ Daily check-in berhasil!'));
+        return formattedResponse;
+    } catch (error) {
+        console.error(chalk.red('[ERROR] ❌ Check-in error:', error.response?.data || error.message));
+    }
 }
 
+/**
+ * Retrieves the task list from the API.
+ */
+async function getTaskList(api) {
+    try {
+        const response = await api.post('/task/list');
+        const formattedResponse = formatResponse(response.data);
+        console.log(chalk.blue('[INFO] 🔹 Mengambil daftar tugas...'));
+        return formattedResponse;
+    } catch (error) {
+        console.error(chalk.red('[ERROR] ❌ Get task list error:', error.response?.data || error.message));
+        return null;
+    }
+}
+
+/**
+ * Completes a specific task via the API.
+ */
+async function completeTask(api, taskId, taskName) {
+    try {
+        const response = await api.post('/task/complete', { taskId });
+        const formattedResponse = formatResponse(response.data);
+        console.log(chalk.blue(`[INFO] 🔹 Menyelesaikan tugas: ${taskName} (ID: ${taskId})`));
+        console.log(chalk.green('[SUCCESS] ✅ Tugas selesai!'));
+        return formattedResponse;
+    } catch (error) {
+        console.error(chalk.red(`[ERROR] ❌ Complete task ${taskId} error:`, error.response?.data || error.message));
+        return null;
+    }
+}
+
+/**
+ * Claims a specific task via the API.
+ */
+async function claimTask(api, taskId, taskName) {
+    try {
+        const response = await api.post('/task/claim', { taskId });
+        const formattedResponse = formatResponse(response.data);
+        console.log(chalk.blue(`[INFO] 🔹 Mengklaim tugas: ${taskName} (ID: ${taskId})`));
+        console.log(chalk.green('[SUCCESS] ✅ Hadiah berhasil diklaim!'));
+        return formattedResponse;
+    } catch (error) {
+        console.error(chalk.red(`[ERROR] ❌ Claim task ${taskId} error:`, error.response?.data || error.message));
+        return null;
+    }
+}
+
+/**
+ * Processes a single token to perform daily check-in, claim, and complete tasks.
+ */
+async function processToken(token) {
+    try {
+        console.log(chalk.yellow(`\n🔄 Memproses token: ${token.slice(-5)}`));
+
+        // Create Axios instance with predefined headers
+        const api = axios.create({
+            baseURL: API_BASE_URL,
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
+                'Accept': '*/*',
+                'Origin': 'https://www.infinityg.ai',
+                'Referer': 'https://www.infinityg.ai/'
+            }
+        });
+
+        // Perform daily check-in
+        await dailyCheckIn(api);
+        await sleep(2000);
+
+        // Get the list of tasks
+        const taskList = await getTaskList(api);
+        await sleep(2000);
+
+        if (taskList && taskList.data && taskList.data.taskModelResponses) {
+            for (const taskModel of taskList.data.taskModelResponses) {
+                if (taskModel.taskResponseList) {
+                    for (const task of taskModel.taskResponseList) {
+                        const taskName = task.taskName;
+                        const taskId = task.taskId;
+                        const taskStatus = task.status;
+
+                        // Handle different task statuses
+                        if (taskStatus === 3) {
+                            await claimTask(api, taskId, taskName);
+                            await sleep(2000);
+                        } else if (taskStatus === 0 && ["Follow X", "Explore the Ground and play a game", "Join Telegram Announcement", "Join Telegram Community", "Share a meme", "Share with your friends", "Quote tweet & tag 3 frens", "Share on X", "Like @Infinityg_ai's tweet", "Fill out the feedback form"].includes(taskName)) {
+                            await completeTask(api, taskId, taskName);
+                            await sleep(2000);
+                            await claimTask(api, taskId, taskName);
+                            await sleep(2000);
+                        } else {
+                            console.log(chalk.yellow(`[WARNING] ⏳ Tugas ${taskName} tidak bisa diproses (status: ${taskStatus}).`));
+                        }
+                    }
+                }
+            }
+        } else {
+            console.log(chalk.blue('[INFO] 🔹 Tidak ada tugas yang ditemukan.'));
+        }
+
+        console.log(chalk.green(`[SUCCESS] ✅ Semua tugas selesai untuk token ${token.slice(-5)}`));
+    } catch (error) {
+        console.error(chalk.red(`[ERROR] ❌ Error processing token: ${error.message}`));
+    }
+}
+
+/**
+ * Main bot function to read tokens from token.txt and process them.
+ */
+async function runBot() {
+    try {
+        console.log(chalk.blue('[INFO] 🚀 Memulai bot InfinityG...'));
+
+        // Read tokens from file, split by newline, trim each, and filter out empty tokens
+        const tokens = fs.readFileSync('token.txt', 'utf8')
+            .split('\n')
+            .map(t => t.trim())
+            .filter(t => t);
+
+        if (tokens.length === 0) {
+            throw new Error('Tidak ada token yang ditemukan di token.txt. Silakan tambahkan token ke file.');
+        }
+
+        console.log(chalk.blue(`[INFO] 🔍 Ditemukan ${tokens.length} token. Mulai proses...`));
+
+        // Process each token
+        for (let i = 0; i < tokens.length; i++) {
+            const token = tokens[i];
+            await processToken(token);
+            await sleep(5000); // Add delay between token processing
+        }
+
+        console.log(chalk.green('[SUCCESS] ✅ Semua token telah diproses dengan sukses!'));
+    } catch (error) {
+        console.error(chalk.red('[ERROR] ❌ Bot error:', error.message));
+    }
+}
+
+/**
+ * Formats milliseconds into a human-readable time format.
+ */
 function formatTimeRemaining(ms) {
-  const seconds = Math.floor((ms / 1000) % 60);
-  const minutes = Math.floor((ms / 1000 / 60) % 60);
-  const hours = Math.floor((ms / 1000 / 60 / 60) % 24);
-  return `${hours}h ${minutes}m ${seconds}s`;
+    const hours = Math.floor(ms / 3600000);
+    const minutes = Math.floor((ms % 3600000) / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    return `${hours}h ${minutes}m ${seconds}s`;
 }
 
+/**
+ * Runs the bot in a loop with a countdown timer between runs.
+ */
 async function runBotWithCountdown() {
-  while (true) {
-    await runBot();
-    
-    let timeUntilNext = getTimeUntilNextRun();
-    console.log(`\nNext run in ${formatTimeRemaining(timeUntilNext)}`);
-    
-    const countdownInterval = setInterval(() => {
-      timeUntilNext -= 1000;
-      process.stdout.write(`\rTime until next run: ${formatTimeRemaining(timeUntilNext)}`);
-      
-      if (timeUntilNext <= 0) {
-        clearInterval(countdownInterval);
-        process.stdout.write('\n');
-      }
-    }, 1000);
-    
-    await sleep(timeUntilNext);
-  }
+    while (true) {
+        await runBot();
+
+        const twelveHours = 12 * 60 * 60 * 1000;
+        let timeRemaining = twelveHours;
+        console.log(chalk.cyan(`\n⏳ Menunggu ${formatTimeRemaining(timeRemaining)} sebelum run berikutnya`));
+
+        // Update countdown every second
+        const countdownInterval = setInterval(() => {
+            timeRemaining -= 1000;
+            process.stdout.write(chalk.cyan(`\r⏳ Menunggu ${formatTimeRemaining(timeRemaining)} sebelum run berikutnya`));
+
+            if (timeRemaining <= 0) {
+                clearInterval(countdownInterval);
+                process.stdout.write('\n');
+            }
+        }, 1000);
+
+        await sleep(twelveHours);
+    }
 }
 
-console.log('Starting bot with countdown timer...');
+// Start the bot with daily check-in and tasks
+console.log(chalk.blue('[INFO] 🚀 Starting bot with daily check-in and tasks...'));
 runBotWithCountdown();
