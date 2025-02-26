@@ -114,6 +114,7 @@ async function processToken(token) {
                         const taskName = task.taskName;
                         const taskId = task.taskId;
                         const taskStatus = task.status;
+                        const taskUnlockType = task.unlockType;
 
                         // Handle different task statuses
                         if (taskStatus === 3) {
@@ -121,15 +122,13 @@ async function processToken(token) {
                             await claimTask(api, taskId);
                             await sleep(2000);
                             console.log(`Task ${taskName} claimed successfully!`);
-                        } else if (taskStatus === 0 && ["Follow X", "Explore the Ground and play a game", "Join Telegram Announcement", "Join Telegram Community", "Share a meme", "Fill out the feedback form", "Quote tweet & tag 3 frens"].includes(taskName)) {
+                        } else if (taskStatus === 0 && ["Follow X", "Explore the Ground and play a game", "Join Telegram Announcement", "Join Telegram Community", "Share a meme", "Share with your friends", "Quote tweet & tag 3 frens", "Share on X", "Like @Infinityg_ai's tweet"].includes(taskName)) {
                             console.log(`Pressing GO! and claiming task: ${taskName} (ID: ${taskId})`);
                             await completeTask(api, taskId);
                             await sleep(2000);
                             await claimTask(api, taskId);
                             await sleep(2000);
                             console.log(`Task ${taskName} completed and claimed successfully!`);
-                        } else if (taskStatus === 0 && !["Follow X", "Explore the Ground and play a game", "Join Telegram Announcement", "Join Telegram Community", "Share a meme", "Fill out the feedback form", "Quote tweet & tag 3 frens"].includes(taskName)) {
-                            console.log(`Task ${taskName} (ID: ${taskId}) has GO! button but not in the list to be automated. Please review manually.`);
                         }
                         else {
                             console.log(`Task ${taskName} (ID: ${taskId}) is not actionable (status: ${taskStatus}).`);
@@ -219,4 +218,3 @@ async function runBotWithCountdown() {
 // Start the bot with daily check-in and tasks
 console.log('Starting bot with daily check-in and tasks...');
 runBotWithCountdown();
-                              
