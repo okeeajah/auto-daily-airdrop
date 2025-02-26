@@ -41,7 +41,7 @@ cd auto-daily-airdrop
 ### **3️⃣ Install Dependencies**  
 
 ```bash
-npm install fs axios ethers path node-cron  
+npm install fs axios ethers path node-cron chalk@4 
 ```
 
 ---
