@@ -113,8 +113,7 @@ async function processAllQuests(walletAddress) {
 async function performDailyCheckIn(walletAddress) {
     const questsData = await fetchQuests(walletAddress);
     if (!questsData || !questsData.success) {
-        console.log(`${RED}Gagal mengambil quests untuk wallet ${walletAddress}. Memulai hitungan mundur tetap.${RESET}`);
-        startCountdown(walletAddress);
+        console.log(`${RED}Gagal mengambil quests untuk wallet ${walletAddress}.${RESET}`);
         return;
     }
 
@@ -129,35 +128,11 @@ async function performDailyCheckIn(walletAddress) {
             const totalPoints = (await fetchQuests(walletAddress))?.total_points || 0;
             console.log(`${GREEN}Daily check-in selesai. Total poin: ${totalPoints}${RESET}`);
         } else {
-            console.log(`${RED}Daily check-in gagal untuk wallet ${walletAddress}. Memulai hitungan mundur tetap.${RESET}`);
+            console.log(`${RED}Daily check-in gagal untuk wallet ${walletAddress}.${RESET}`);
         }
     } else {
-        console.log(`Daily check-in (ID: 4) tidak tersedia atau sudah selesai untuk wallet ${walletAddress} hari ini. Memulai hitungan mundur.`);
+        console.log(`Daily check-in tidak tersedia atau sudah selesai untuk wallet ${walletAddress}.`);
     }
-    startCountdown(walletAddress);
-}
-
-function startCountdown(walletAddress) {
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setUTCDate(now.getUTCDate() + 1);
-    tomorrow.setUTCHours(0, 0, 0, 0);
-    const timeLeft = tomorrow - now;
-
-    console.log(`Daily check-in berikutnya untuk wallet ${walletAddress} tersedia dalam:`);
-    const countdown = setInterval(() => {
-        const remaining = tomorrow - new Date();
-        if (remaining <= 0) {
-            clearInterval(countdown);
-            console.log(`${GREEN}\nDaily check-in sekarang tersedia untuk wallet ${walletAddress}!${RESET}`);
-            performDailyCheckIn(walletAddress);
-        } else {
-            const hours = Math.floor(remaining / (1000 * 60 * 60));
-            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-            process.stdout.write(`\r${hours}j ${minutes}m ${seconds}d`);
-        }
-    }, 1000);
 }
 
 // Fungsi untuk menunggu dengan Promise
@@ -166,65 +141,38 @@ function sleep(ms) {
 }
 
 async function main() {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
-
     while (true) {
         const privateKeys = await readPrivateKeys();
         if (privateKeys.length === 0) {
             console.log(`${RED}Tidak ada private key yang ditemukan di pk.txt.${RESET}`);
-            rl.close();
             return;
         }
 
-        const wallets = [];
-        console.log(`${BLUE}Memuat wallets...${RESET}`);
         for (let i = 0; i < privateKeys.length; i++) {
             const wallet = walletFromPrivateKey(privateKeys[i]);
-            if (wallet) {
-                wallets.push({ wallet });
-            } else {
-                console.log(`${RED}Gagal memuat wallet dari private key ${i + 1}${RESET}`);
-            }
-        }
+            if (!wallet) continue;
 
-        if (wallets.length === 0) {
-            console.log(`${RED}Tidak ada wallet valid untuk diproses.${RESET}`);
-            rl.close();
-            return;
-        }
-
-        rl.close();
-
-        for (const { wallet } of wallets) {
             console.log(`${MAGENTA}Memulai proses untuk wallet: ${wallet.address}${RESET}`);
 
-            // 1. Lakukan daily check-in
+            // Daily Check-In
             console.log(`${YELLOW}Memulai daily check-in...${RESET}`);
             await performDailyCheckIn(wallet.address);
-            console.log(`${GREEN}Selesai daily check-in untuk wallet: ${wallet.address}${RESET}`);
 
-            // 2. Selesaikan semua quests
+            // Selesaikan Semua Quests
             console.log(`${YELLOW}Memulai menyelesaikan semua quests...${RESET}`);
             await processAllQuests(wallet.address);
-            console.log(`${GREEN}Selesai menyelesaikan semua quests untuk wallet: ${wallet.address}${RESET}`);
 
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Tunggu sebelum melanjutkan ke wallet berikutnya
             console.log(`${CYAN}Menunggu 2 detik sebelum melanjutkan ke wallet berikutnya...${RESET}`);
+            await sleep(2000);
         }
 
-        console.log(`${GREEN}Semua proses selesai!${RESET}`);
-
-        // Tambahkan cooldown selama X jam
+        // Tambahkan cooldown
         const cooldownHours = 24; // Ubah sesuai kebutuhan
-        console.log(`${CYAN}Menunggu selama ${cooldownHours} jam sebelum memulai kembali...${RESET}`);
-        await sleep(cooldownHours * 60 * 60 * 1000); // Ubah jam menjadi milidetik
-        console.log(`${CYAN}Memulai kembali proses setelah cooldown...${RESET}`);
+        console.log(`${CYAN}Menunggu selama ${cooldownHours * 60} menit sebelum memulai kembali...${RESET}`);
+        await sleep(cooldownHours * 60 * 60 * 1000); // Cooldown dalam milidetik
     }
 }
 
 // Jalankan skrip
 main().catch(error => console.error(`${RED}Error tak terduga:${RESET}`, error));
-      
