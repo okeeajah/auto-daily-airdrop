@@ -135,8 +135,7 @@ node zaros.js
 ```bash
 cd overdive  
 screen -S overdive  
-nano pk.txt  
-nano proxies.txt  
+nano pk.txt    
 ```
 
 🎯 **Run the script:**  
