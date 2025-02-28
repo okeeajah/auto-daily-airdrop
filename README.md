@@ -7,8 +7,18 @@
 
 ---
 
+## 📥 **Clone Repository**  
+Sebelum menjalankan script, clone repository ini terlebih dahulu:  
+
+```bash
+git clone https://github.com/okeeajah/auto-daily-airdrop.git  
+cd auto-daily-airdrop  
+```
+
+---
+
 ## 📦 **Install Dependencies**  
-Sebelum menjalankan script, pastikan menginstall semua module yang diperlukan:  
+Pastikan menginstall semua module yang diperlukan:  
 
 ```bash
 npm install axios fs readline ethers https-proxy-agent socks-proxy-agent chalk@4 node-cron path
