@@ -7,6 +7,15 @@
 
 ---
 
+## 📦 **Install Dependencies**  
+Sebelum menjalankan script, pastikan menginstall semua module yang diperlukan:  
+
+```bash
+npm install axios fs readline ethers https-proxy-agent socks-proxy-agent chalk@4 node-cron path
+```
+
+---
+
 ## 📂 **Struktur Direktori**
 ```
 auto-daily-airdrop/
@@ -28,11 +37,6 @@ auto-daily-airdrop/
 ```bash
 sudo apt install screen -y  # Ubuntu/Debian  
 sudo yum install screen -y  # CentOS/RHEL  
-```
-
-🖍️ **(Optional) Install `chalk@4` for better output formatting:**  
-```bash
-npm install chalk@4  
 ```
 
 ---
@@ -62,7 +66,6 @@ cd dusted
 screen -S lasso  
 nano pk.txt  
 nano token.txt  
-npm install axios ethers fs node-cron chalk@4  
 ```
 🎯 **Run the script:**  
 ```bash
@@ -109,7 +112,6 @@ nano config.json
 
 🎯 **Run the script:**  
 ```bash
-npm install axios fs path chalk@4  
 node zaros.js  
 ```
 
@@ -129,7 +131,6 @@ nano proxies.txt
 
 🎯 **Run the script:**  
 ```bash
-npm install axios fs readline ethers https-proxy-agent socks-proxy-agent chalk@4  
 node overdive.js  # atau  
 node bot.js  
 ```
