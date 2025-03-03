@@ -1,167 +1,148 @@
-# 🚀 **Auto Daily Airdrop Bot**  
+# 📌 Auto Daily Airdrop Bot 🚀
 
-🔹 **Automate daily check-ins, tasks, and claims**  
-🔹 **Supports multiple platforms: Infinity Ground, Lasso, Klok AI, Zaros, and Fun Overdive**  
-🔹 **Runs in the background using `screen` on VPS**  
-🔹 **Supports Multi Wallet & Proxies**  
+Automate your daily check-ins, tasks, and claims for multiple platforms with ease!  
+This script will help you get daily rewards from multiple platforms, including **Infinity Ground, Lasso, Klok AI, Zaros, Fun Overdive, dan AIDA** with minimal effort!
+
+## 🎯 Features  
+✅ Auto Check-in & Task Completion for Infinity Ground  
+✅ Auto Play Lasso & Claim MON  
+✅ Automate Tasks with Klok AI  
+✅ Zaros Daily Check-in with Wallet Integration  
+✅ Fun Overdive Auto Task + Daily Check-in (Support Multi Wallet & Proxies)  
+✅ AIDA Auto Task Bot (Complete all tasks except Invite Friends)  
+✅ Run scripts in the background using `screen` on VPS  
 
 ---
 
-## 📥 **Clone Repository**  
-Sebelum menjalankan script, clone repository ini terlebih dahulu:  
+## 🛠️ Installation  
 
+### **1️⃣ Clone Repository & Install Dependencies**  
 ```bash
-git clone https://github.com/okeeajah/auto-daily-airdrop.git  
-cd auto-daily-airdrop  
-```
+git clone https://github.com/okeeajah/auto-daily-airdrop.git
+cd auto-daily-airdrop
 
----
-
-## 📦 **Install Dependencies**  
-Pastikan menginstall semua module yang diperlukan:  
-
-```bash
-npm install axios fs readline ethers https-proxy-agent socks-proxy-agent chalk@4 node-cron path
-```
-
----
-
-## 📂 **Struktur Direktori**
-```
-auto-daily-airdrop/
-│── dusted/        # Auto Play Lasso & Claim MON
-│── infinity/      # Auto Check-in & Task Completion for Infinity Ground
-│── klok/         # Automate Tasks with Klok AI
-│── zaros/        # Zaros Daily Check-in with Wallet Integration
-│── overdive/     # Fun Overdive Auto Task + Daily Check-in
-│── README.md     # Dokumentasi utama
+npm install axios fs ethers path node-cron readline https-proxy-agent socks-proxy-agent
 ```
 
 ---
 
-## 🛠️ **Installation**  
-
-### 1️⃣ **Prerequisites**  
-💾 Install **Node.js** & `screen`:  
-
+### **2️⃣ Infinity Ground Auto Check-in**  
 ```bash
-sudo apt install screen -y  # Ubuntu/Debian  
-sudo yum install screen -y  # CentOS/RHEL  
+cd infinity
+nano token.txt
+
+screen -S infinity
+node infinity.js
 ```
 
 ---
 
-## 📌 **Project 1: Infinity Ground Auto Check-in**  
-✔️ **Check-in & Complete Tasks Automatically**  
+### **3️⃣ Auto Play Lasso and Claim MON**  
+```bash
+cd dusted
+nano pk.txt
+nano token.txt
 
-### **Setup**
-```bash
-cd infinity  
-screen -S infinity  
-nano token.txt  
-```
-🎯 **Run the script:**  
-```bash
-node infinity.js  
+screen -S lasso
+node dusted.js
 ```
 
 ---
 
-## 🎮 **Project 2: Auto Play Lasso & Claim MON**  
-✔️ **Uses Bearer Token + Wallet Private Key**  
+### **4️⃣ Klok AI Auto Tasks**  
+```bash
+cd klok
+nano token.txt
 
-### **Setup**
-```bash
-cd dusted  
-screen -S lasso  
-nano pk.txt  
-nano token.txt  
-```
-🎯 **Run the script:**  
-```bash
-node dusted.js  
+screen -S klok
+node klok.js
 ```
 
 ---
 
-## 🤖 **Project 3: Automate Tasks with Klok AI**  
-✔️ **Automates multiple AI tasks**  
+### **5️⃣ Zaros Daily Check-in**  
+**1. Get session ID & account info**  
+- Open Developer Tools (**F12**)  
+- Go to **Local Storage** → **Find Session ID**  
+- AccountID: **Trading Account#(YOUR ID)** (ex: Trading Account#8930)  
 
-### **Setup**
+**2. Setup Config File**  
 ```bash
-cd klok  
-screen -S klok  
-nano token.txt  
+cd zaros
+nano config.json
 ```
-🎯 **Run the script:**  
-```bash
-node klok.js  
-```
-
----
-
-## 💼 **Project 4: Zaros Daily Check-in**  
-✔️ **Login & Check-in using Wallet Integration**  
-
-### **Setup**
-```bash
-cd zaros  
-screen -S zaros  
-nano config.json  
-```
-
-📜 **Config Format (`config.json`):**
+- Format:  
 ```json
 {
   "baseUrl": "https://production.api.zaros.fi",
   "accountId": "8xxx",
-  "walletAddress": "WALLETADDREESS",
-  "sessionToken": "your-session-token-here"
+  "walletAddress": "YOUR_WALLET_ADDRESS",
+  "sessionToken": "YOUR_SESSION_TOKEN"
 }
 ```
 
-🎯 **Run the script:**  
+**3. Run the bot**  
 ```bash
-node zaros.js  
+screen -S zaros
+node zaros.js
 ```
 
 ---
 
-## 🎯 **Project 5: Fun Overdive Auto Task + Daily Check-in**  
-✔️ **Supports Multi Wallet & Proxies**  
-✔️ **Requires Twitter Verification for Social Tasks**  
+### **6️⃣ Fun Overdive Auto Task + Daily Check-in**  
+✅ **Support Multi Wallet & Proxies**  
+➡️ **NEED TO VERIFY TWITTER FOR SOCIAL TASKS**  
 
-### **Setup**
 ```bash
-cd overdive  
-screen -S overdive  
-nano pk.txt    
-```
+cd overdive
+nano pk.txt
+nano proxies.txt
 
-🎯 **Run the script:**  
-```bash
-node overdive.js  # atau  
-node bot.js  
+screen -S overdive
+node overdive.js
 ```
 
 ---
 
-### 🔥 **Tips & Tricks**  
-✔️ **Exit `screen` session:** `Ctrl + A`, lalu `D`  
-✔️ **Reopen `screen` session:**  
+### **7️⃣ AIDA Auto Task Bot**  
+✅ **Auto Complete all tasks (exclude Invite Friends)**  
+✅ **Support Multi Accounts**  
+
+**1. Get Access Token**  
+- Open Developer Tools (**F12**)  
+- Go to **Application** → **Local Storage**  
+- Find **Access Token**  
+
+**2. Save Token**  
 ```bash
-screen -r overdive  
+cd aidapp
+nano token.txt
 ```
-✔️ **Check all running `screen` sessions:**  
+- Paste your **Access Token**  
+- Save & Exit  
+
+**3. Run AIDA Bot**  
 ```bash
-screen -ls  
+screen -S aida
+node bot.js
 ```
-✔️ **Terminate a `screen` session:**  
+
+**4. Run Multi Referral**  
 ```bash
-screen -X -S overdive quit  
+node multireff.js
+```
+
+**5. Run Referral**  
+```bash
+node reff.js
 ```
 
 ---
 
-💎 **Now you’re ready to automate everything & claim daily rewards like a pro! 🚀**  
-⭐ **Star this repo if you find it useful!** ⭐
+## 🔥 Notes  
+- **Always use `screen`** to run bots on VPS  
+- **Make sure to enter valid tokens/wallets**  
+- **Proxies are required for Fun Overdive**  
+- **Twitter verification is needed for Overdive social tasks**  
+
+🚀 **Enjoy your automated tasks!** 🚀
