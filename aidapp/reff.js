@@ -1,6 +1,7 @@
-const axios = require('axios');
-const fs = require('fs').promises;
-const { ethers } = require('ethers');
+const { Wallet } = require("ethers");
+const axios = require("axios");
+const fs = require("fs").promises;
+const readline = require("readline");
 
 const banner = `
 =======================================
@@ -9,159 +10,225 @@ const banner = `
 `;
 
 const config = {
-    baseUrl: 'https://back.aidapp.com',
-    referralLink: 'https://my.aidapp.com?refCode=msew8RAmU41BymD',
-    campaignId: '6b963d81-a8e9-4046-b14f-8454bc3e6eb2',
-    excludedMissionId: 'f8edb0b4-ac7d-4a32-8522-65c5fb053725',
+    baseUrl: "https://back.aidapp.com",
+    campaignId: "6b963d81-a8e9-4046-b14f-8454bc3e6eb2",
+    excludedMissionId: "f8edb0b4-ac7d-4a32-8522-65c5fb053725", // Task Invite 1 friend
+    referralCode: "msew8RAmU41BymD", // Referral Anda
     headers: {
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
-        'origin': 'https://my.aidapp.com',
-        'referer': 'https://my.aidapp.com/'
-    }
+        "authority": "back.aidapp.com",
+        "accept": "*/*",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "accept-language": "en-US,en;q=0.6",
+        "origin": "https://my.aidapp.com",
+        "referer": "https://my.aidapp.com/",
+        "sec-ch-ua": '"Not(A:Brand";v="99", "Brave";v="133", "Chromium";v="133"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"Windows"',
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-site",
+        "sec-gpc": "1",
+        "user-agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
+    },
 };
 
-// Fungsi buat wallet baru
-async function createWallet() {
-    const wallet = ethers.Wallet.createRandom();
-    console.log(`New Wallet Created: ${wallet.address}`);
-
-    const walletData = `${wallet.address}|${wallet.privateKey}\n`;
-    await fs.appendFile('wallets.txt', walletData);
-
+// Fungsi untuk Membuat Wallet Baru
+async function generateWallet() {
+    const wallet = Wallet.createRandom();
+    console.log(`\n===== Wallet Baru Dibuat =====`);
+    console.log(`Alamat: ${wallet.address}`);
+    console.log(`Backup Phrase: ${wallet.mnemonic.phrase}`);
+    console.log(`Private Key: ${wallet.privateKey}\n`);
     return wallet;
 }
 
-// Fungsi auto register pakai referral link
-async function registerWallet(wallet) {
-    try {
-        const response = await axios.post(`${config.baseUrl}/auth/register`, {
-            address: wallet.address,
-            refCode: 'msew8RAmU41BymD'
-        }, { headers: config.headers });
+// Fungsi untuk Menandatangani Pesan
+async function signMessage(wallet) {
+    const message = `MESSAGE_ETHEREUM_${Date.now()}:${Date.now()}`;
+    const signature = await wallet.signMessage(message);
+    return { message, signature };
+}
 
-        if (response.data && response.data.token) {
-            console.log(`✅ Wallet ${wallet.address} registered successfully!`);
-            await fs.appendFile('token.txt', response.data.token + '\n');
-            return response.data.token;
+// Fungsi untuk Mendaftarkan Akun
+async function registerAccount(wallet) {
+    try {
+        const { message, signature } = await signMessage(wallet);
+        const url = `${config.baseUrl}/user-auth/login?strategy=WALLET&chainType=EVM&address=${wallet.address}&token=${message}&signature=${signature}&inviter=${config.referralCode}`;
+        const response = await axios.get(url);
+
+        if (response.status === 200 && response.data.tokens?.access_token) {
+            console.log(`Registered account ${wallet.address} with token: ${response.data.tokens.access_token}`);
+            return response.data.tokens.access_token;
         } else {
-            console.log(`❌ Failed to register wallet ${wallet.address}`);
-            return null;
+            throw new Error("Failed to register account or retrieve access token.");
         }
     } catch (error) {
-        console.error(`❌ Error registering wallet ${wallet.address}:`, error.response?.data || error.message);
+        console.error(`Error registering account:`, error.message);
         return null;
     }
 }
 
-// Fungsi dapatkan daftar task yang tersedia
+// Fungsi untuk Menyimpan Wallet ke config.json
+async function saveWalletToConfig(wallet) {
+    try {
+        const data = {
+            address: wallet.address,
+            privateKey: wallet.privateKey,
+            mnemonic: wallet.mnemonic.phrase,
+        };
+
+        // Baca atau buat file config.json
+        let existingConfig = {};
+        try {
+            const configFileContent = await fs.readFile("config.json", "utf8");
+            existingConfig = JSON.parse(configFileContent);
+        } catch (readError) {
+            // Jika file tidak ada atau tidak valid, buat objek kosong
+            console.log("config.json tidak ditemukan atau tidak valid, membuat baru.");
+        }
+
+        if (!existingConfig.wallets) {
+            existingConfig.wallets = [];
+        }
+        
+        existingConfig.wallets.push(data);
+
+        await fs.writeFile("config.json", JSON.stringify(existingConfig, null, 2), "utf8");
+        console.log(`Saved wallet ${wallet.address} to config.json`);
+    } catch (error) {
+        console.error(`Error saving wallet to config.json:`, error.message);
+    }
+}
+
+// Fungsi untuk Mendapatkan Misi yang Tersedia
 async function getAvailableMissions(accessToken) {
     try {
         const currentDate = new Date().toISOString();
-        const response = await axios.get(
-            `${config.baseUrl}/questing/missions?filter%5Bdate%5D=${currentDate}&filter%5Bgrouped%5D=true&filter%5Bprogress%5D=true&filter%5Brewards%5D=true&filter%5Bstatus%5D=AVAILABLE&filter%5BcampaignId%5D=${config.campaignId}`,
-            {
-                headers: {
-                    ...config.headers,
-                    'authorization': `Bearer ${accessToken}`
-                }
-            }
-        );
+        const url = `${config.baseUrl}/questing/missions?filter%5Bdate%5D=${currentDate}&filter%5Bgrouped%5D=true&filter%5Bprogress%5D=true&filter%5Brewards%5D=true&filter%5Bstatus%5D=AVAILABLE&filter%5BcampaignId%5D=${config.campaignId}`;
+        const response = await axios.get(url, {
+            headers: { ...config.headers, authorization: `Bearer ${accessToken}` },
+        });
 
-        return response.data.data.filter(mission => mission.progress === "0" && mission.id !== config.excludedMissionId);
+        return response.data.data.filter(
+            (mission) => mission.progress === "0" && mission.id !== config.excludedMissionId
+        );
     } catch (error) {
-        console.error('❌ Error fetching available missions:', error.response?.data || error.message);
+        console.error("Error fetching available missions:", error.message);
         return [];
     }
 }
 
-// Fungsi untuk menyelesaikan task
+// Fungsi untuk Menyelesaikan Misi
 async function completeMission(missionId, accessToken) {
     try {
-        await axios.post(
-            `${config.baseUrl}/questing/mission-activity/${missionId}`,
-            {},
-            {
-                headers: {
-                    ...config.headers,
-                    'authorization': `Bearer ${accessToken}`,
-                    'content-length': '0'
-                }
-            }
-        );
-
-        console.log(`✅ Mission ${missionId} completed successfully!`);
+        const url = `${config.baseUrl}/questing/mission-activity/${missionId}`;
+        await axios.post(url, {}, { headers: { ...config.headers, authorization: `Bearer ${accessToken}` } });
+        console.log(`Mission ${missionId} completed successfully!`);
         return true;
     } catch (error) {
-        console.error(`❌ Error completing mission ${missionId}:`, error.response?.data || error.message);
+        console.error(`Error completing mission ${missionId}:`, error.message);
         return false;
     }
 }
 
-// Fungsi untuk klaim reward setelah menyelesaikan task
+// Fungsi untuk Mengklaim Hadiah Misi
 async function claimMissionReward(missionId, accessToken) {
     try {
-        await axios.post(
-            `${config.baseUrl}/questing/mission-reward/${missionId}`,
-            {},
-            {
-                headers: {
-                    ...config.headers,
-                    'authorization': `Bearer ${accessToken}`,
-                    'content-length': '0'
-                }
-            }
-        );
-
-        console.log(`🎉 Reward for mission ${missionId} claimed successfully!`);
+        const url = `${config.baseUrl}/questing/mission-reward/${missionId}`;
+        await axios.post(url, {}, { headers: { ...config.headers, authorization: `Bearer ${accessToken}` } });
+        console.log(`Reward for mission ${missionId} claimed successfully!`);
         return true;
     } catch (error) {
-        console.error(`❌ Error claiming reward for mission ${missionId}:`, error.response?.data || error.message);
+        console.error(`Error claiming reward for mission ${missionId}:`, error.message);
         return false;
     }
 }
 
-// Fungsi utama untuk menjalankan bot
-async function autoCreateRegisterAndQuest(amount) {
-    console.log(banner);
-    console.log(`Creating & Registering ${amount} wallets and completing quests...`);
+// Fungsi Utama untuk Memproses Akun
+async function processAccount(wallet, accessToken) {
+    try {
+        // Simpan wallet ke config.json
+        await saveWalletToConfig(wallet);
 
-    for (let i = 0; i < amount; i++) {
-        const wallet = await createWallet();
-        const accessToken = await registerWallet(wallet);
-        if (!accessToken) continue;
-
-        console.log(`🔎 Fetching available missions for ${wallet.address}...`);
-        const missions = await getAvailableMissions(accessToken);
-        if (missions.length === 0) {
-            console.log('❌ No available missions for this account.');
-            continue;
+        // Ambil misi yang tersedia
+        const availableMissions = await getAvailableMissions(accessToken);
+        if (availableMissions.length === 0) {
+            console.log("No missions available for this account.");
+            return;
         }
 
-        console.log(`✅ Found ${missions.length} missions. Starting completion...`);
-        for (const mission of missions) {
-            console.log(`🚀 Completing mission: ${mission.label} (ID: ${mission.id})`);
-            
+        console.log(`Found ${availableMissions.length} missions to complete.`);
+
+        // Proses setiap misi
+        for (const mission of availableMissions) {
+            console.log(`Processing mission: ${mission.label} (ID: ${mission.id})`);
+
             const completed = await completeMission(mission.id, accessToken);
             if (completed) {
-                await new Promise(resolve => setTimeout(resolve, 1000)); 
                 await claimMissionReward(mission.id, accessToken);
             }
 
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Tambahkan jeda waktu antar misi
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+        }
+    } catch (error) {
+        console.error("Error processing account:", error.message);
+    }
+}
+
+// Fungsi untuk Meminta Input dari Pengguna
+function askQuestion(query) {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+
+    return new Promise((resolve) => rl.question(query, (ans) => rl.close() || resolve(ans)));
+}
+
+// Jalankan Bot
+(async () => {
+    try {
+        console.log(banner);
+
+        // Meminta jumlah akun yang ingin dibuat
+        const answer = await askQuestion("Enter the number of accounts to generate: ");
+
+        const accountCount = parseInt(answer);
+
+        if (isNaN(accountCount) || accountCount <= 0) {
+            throw new Error("Invalid number of accounts.");
         }
 
-        console.log(`🎉 Finished processing wallet ${wallet.address}`);
+        console.log(`Starting bot to generate ${accountCount} accounts...`);
+
+        for (let i = 1; i <= accountCount; i++) {
+            console.log(`\nProcessing account ${i}/${accountCount}...`);
+
+            // Buat wallet baru dan daftar akun
+            const wallet = await generateWallet();
+            const accessToken = await registerAccount(wallet);
+
+            if (!accessToken) {
+                console.error(`Failed to register account ${i}. Skipping...`);
+                continue;
+            }
+
+            // Proses akun dan misinya
+            try {
+                await processAccount(wallet, accessToken);
+            } catch (error) {
+                console.error(`Error saat memproses akun:`, error.message);
+            }
+            // Tambahkan jeda waktu antar akun
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+
+            console.log(`Finished processing account ${i}`);
+        }
+
+        console.log("\nBot finished processing all accounts.");
+    } catch (error) {
+        console.error("An error occurred:", error.message);
     }
-
-    console.log(`\n🚀 Bot finished processing all wallets & quests.`);
-}
-
-// Jalankan auto create, register, dan quest completion
-async function main() {
-    const amount = parseInt(process.argv[2], 10) || 1;
-    await autoCreateRegisterAndQuest(amount);
-}
-
-main().catch(error => {
-    console.error('❌ Bot encountered an error:', error);
-});
+})();
