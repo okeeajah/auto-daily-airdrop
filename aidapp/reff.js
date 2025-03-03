@@ -31,6 +31,7 @@ const config = {
         "user-agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
     },
+    createWalletMissionId: "df2a34a4-05a9-4bde-856a-7f5b8768889a" // ID Misi "Create the wallet"
 };
 
 // Fungsi untuk Membuat Wallet Baru
@@ -145,11 +146,29 @@ async function claimMissionReward(missionId, accessToken) {
     }
 }
 
-// Fungsi Utama untuk Memproses Akun
+// Fungsi untuk Memproses Akun
 async function processAccount(wallet, accessToken) {
     try {
         // Simpan wallet ke config.json
         await saveWalletToConfig(wallet);
+
+        // **Task: Create Wallet**
+        // Check if the create wallet mission ID is set
+        if (config.createWalletMissionId) {
+            console.log(`Attempting to complete Create Wallet mission (ID: ${config.createWalletMissionId})`);
+            const createWalletCompleted = await completeMission(config.createWalletMissionId, accessToken);
+            
+            if (createWalletCompleted) {
+                await claimMissionReward(config.createWalletMissionId, accessToken);
+            } else {
+                console.log(`Failed to complete Create Wallet mission (ID: ${config.createWalletMissionId}).`);
+            }
+            
+            // Small delay after attempting the create wallet mission
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+        } else {
+            console.log("Create Wallet mission ID not set. Skipping Create Wallet mission.");
+        }
 
         // Ambil misi yang tersedia
         const availableMissions = await getAvailableMissions(accessToken);
