@@ -21,7 +21,7 @@ This script will help you get daily rewards from multiple platforms, including *
 git clone https://github.com/okeeajah/auto-daily-airdrop.git
 cd auto-daily-airdrop
 
-npm install axios fs ethers path node-cron readline https-proxy-agent socks-proxy-agent
+npm install axios fs ethers path node-cron readline https-proxy-agent socks-proxy-agent crypto
 ```
 
 ---
