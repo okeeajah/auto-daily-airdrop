@@ -1,1 +1,1 @@
-""npm install axios cli-table chalk http-proxy-agent https-proxy-agent crypto""
+npm install axios cli-table chalk@4 http-proxy-agent https-proxy-agent crypto
