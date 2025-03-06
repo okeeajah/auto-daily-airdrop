@@ -124,7 +124,8 @@ const login = async (email, password) => {
         const hashedPassword = hashPassword(password); // Hash the password before sending
         const response = await axios.post('https://app.kivanet.com/api/user/login', { email, password: hashedPassword }, { headers, ...proxyConfig });
         
-        console.log(chalk.yellow(`Login response for ${email}:`), response.data); // Log full response for debugging
+        // Suppress the login response
+        // console.log(chalk.yellow(`Login response for ${email}:`), response.data); // Remove this line
         
         if (response.data.state) {
             return response.data.object; // Return token
