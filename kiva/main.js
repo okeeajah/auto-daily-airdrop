@@ -4,15 +4,11 @@ const Table = require('cli-table');
 const chalk = require('chalk');
 const crypto = require('crypto');
 const path = require('path');
-const HttpProxyAgent = require('http-proxy-agent');
-const HttpsProxyAgent = require('https-proxy-agent');
 
 const DATA_FILE = 'previousBalances.json';
 const ACC_FILE = 'acc.txt';
-const PROXY_FILE = 'proxy.txt';
 let previousBalances = {};
 let accounts = [];
-let proxies = [];
 
 // Ensure necessary files exist
 const ensureFileExists = async (filePath) => {
@@ -41,20 +37,6 @@ const loadAccounts = async () => {
     } catch (error) {
         console.error(chalk.red(`Error loading accounts from ${ACC_FILE}:`), error.message);
         process.exit(1);
-    }
-};
-
-// Load proxies from proxy.txt
-const loadProxies = async () => {
-    try {
-        const data = await fs.readFile(PROXY_FILE, 'utf8');
-        if (data.trim()) {
-            proxies = data.trim().split('\n').map(line => line.trim());
-        } else {
-            console.log(chalk.yellow('No proxies found. Running without proxy.'));
-        }
-    } catch (error) {
-        console.error(chalk.red(`Error loading proxies from ${PROXY_FILE}:`), error.message);
     }
 };
 
@@ -109,23 +91,10 @@ function calculateMiningTime(signTime, nowTime) {
 // Login function
 const login = async (email, password) => {
     const headers = getHeaders();
-    
-    // Select a random proxy if available
-    let proxyConfig;
-    if (proxies.length > 0) {
-        const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
-        proxyConfig = { 
-            httpAgent: new HttpProxyAgent(randomProxy), 
-            httpsAgent: new HttpsProxyAgent(randomProxy) 
-        };
-    }
 
     try {
         const hashedPassword = hashPassword(password); // Hash the password before sending
-        const response = await axios.post('https://app.kivanet.com/api/user/login', { email, password: hashedPassword }, { headers, ...proxyConfig });
-        
-        // Suppress the login response
-        // console.log(chalk.yellow(`Login response for ${email}:`), response.data); // Remove this line
+        const response = await axios.post('https://app.kivanet.com/api/user/login', { email, password: hashedPassword }, { headers });
         
         if (response.data.state) {
             return response.data.object; // Return token
@@ -161,15 +130,27 @@ const getMyAccountInfo = async (token) => {
     }
 };
 
-// Get sign info
-const getSignInfo = async (token) => {
-    try {
-        const response = await axios.get('https://app.kivanet.com/api/user/getSignInfo', { headers: getHeaders(token) });
-        return response.data.object;
-    } catch (error) {
-        console.error(chalk.red(`Error fetching sign info: ${error.message}`));
-        return null;
+// Get sign info with retry
+const getSignInfo = async (token, maxRetries = 3) => {
+    let retries = 0;
+    while (retries < maxRetries) {
+        try {
+            const response = await axios.get('https://app.kivanet.com/api/user/getSignInfo', { headers: getHeaders(token) });
+            if (response.data && response.data.object) {
+                return response.data.object;
+            } else {
+                console.warn(chalk.yellow(`getSignInfo: Retrying attempt ${retries + 1} - No data.object in response`));
+                retries++;
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retrying
+            }
+        } catch (error) {
+            console.error(chalk.red(`getSignInfo: Error fetching sign info (attempt ${retries + 1}): ${error.message}`));
+            retries++;
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retrying
+        }
     }
+    console.error(chalk.red(`getSignInfo: Max retries reached - Unable to fetch sign info after ${maxRetries} attempts`));
+    return null;
 };
 
 // Display stats in a table
@@ -230,42 +211,84 @@ const processAccount = async ({ email, password }) => {
 
         if (!signInfo || !signInfo.signTime || !signInfo.nowTime) {
             stats.miningTime = chalk.gray('N/A');
+            stats.increment = null; // No increment calculation possible without balance info
         } else {
             stats.miningTime = calculateMiningTime(parseInt(signInfo.signTime), parseInt(signInfo.nowTime));
-        }
-        
-        // Calculate Mining Increment
-        const currentBalance = parseFloat(accountInfo.balance);
-        const prevBalance = previousBalances[stats.id];
+            
+            // Calculate Mining Increment
+            const currentBalance = parseFloat(accountInfo.balance);
+            const prevBalance = previousBalances[stats.id];
 
-        if (prevBalance !== undefined) {
-            stats.increment = currentBalance - prevBalance; // Calculate increment
-        } else {
-            stats.increment = null; // Set increment to null if previous balance is not available
-        }
+            if (prevBalance !== undefined) {
+                stats.increment = currentBalance - prevBalance; // Calculate increment
+            } else {
+                stats.increment = null; // Set increment to null if previous balance is not available
+            }
 
-        previousBalances[stats.id] = currentBalance; // Update previous balance
+            previousBalances[stats.id] = currentBalance; // Update previous balance
+        }
 
     } catch (error) {
-        stats.status = chalk.red(`Error processing account ${email}: ${error.message}`);
-    }
+       stats.status=chalk.red(`Error processing account ${email}: ${error.message}`);
+   }
 
-    return stats;
+   return stats;
 };
+
+// Perform mining for a single account
+const performMining = async (token, email) => {
+    try {
+        await axios.post("https://app.kivanet.com/api/user/sign", {}, { headers: getHeaders(token) });
+        return true;
+    } catch (error) {
+        console.error(chalk.red(`Mining failed for ${email}:`, error.message));
+        return false;
+    }
+};
+
+// Perform mining function every 24 hours for each account
+async function performMiningForAllAccounts() {
+    for (let account of accounts) {
+        const token = await login(account.email, account.password);
+        if (token) {
+            try {
+                // Perform mining
+                const miningSuccessful = await performMining(token, account.email);
+                if (!miningSuccessful) {
+                    console.error(chalk.red(`Mining failed for ${account.email}`));
+                }
+            } catch (error) {
+                console.error(chalk.red(`Mining failed for ${account.email}:`, error.message));
+            }
+        } else {
+            console.error(chalk.red(`Login failed for ${account.email}`));
+        }
+    }
+}
 
 // Main bot execution function
 const runBot = async () => {
     await ensureFileExists(ACC_FILE);
-    await ensureFileExists(PROXY_FILE);
     await ensureFileExists(DATA_FILE);
 
     await loadPreviousBalances();
     
-    await loadProxies();
-    
     await loadAccounts(); // Load accounts
 
     console.log(chalk.green(`Loaded ${accounts.length} accounts from acc.txt`));
+
+    // Perform initial mining silently
+    await performMiningForAllAccounts();
+
+    // Display table immediately after initial mining
+    const results = await Promise.all(accounts.map(processAccount));
+    displayStats(results);
+
+    // Start automatic mining every 24 hours using setInterval
+    setInterval(async () => {
+        console.log(chalk.yellow("Performing automatic mining..."));
+        await performMiningForAllAccounts();
+    }, 24 * 60 * 60 * 1000); // Every 24 hours
 
     setInterval(async () => {
         const results = await Promise.all(accounts.map(processAccount));
@@ -277,4 +300,4 @@ const runBot = async () => {
 };
 
 // Start the bot
-runBot().catch(err => console.error(chalk.red('Fatal error:'), err));
+runBot().catch(err => console.error(chalk.red("Fatal error:"), err));
