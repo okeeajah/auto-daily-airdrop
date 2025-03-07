@@ -1,7 +1,7 @@
 # 📌 Auto Daily Airdrop Bot 🚀
 
 Automate your daily check-ins, tasks, and claims for multiple platforms with ease!  
-This script will help you get daily rewards from multiple platforms, including **Infinity Ground, Lasso, Klok AI, Zaros, Fun Overdive, dan AIDA** with minimal effort!
+This script will help you mendapatkan daily rewards dari berbagai platform, termasuk **Infinity Ground, Lasso, Klok AI, Zaros, Fun Overdive, AIDA, dan Dreamer** dengan mudah!
 
 ## 🎯 Features  
 ✅ Auto Check-in & Task Completion for Infinity Ground  
@@ -10,6 +10,7 @@ This script will help you get daily rewards from multiple platforms, including *
 ✅ Zaros Daily Check-in with Wallet Integration  
 ✅ Fun Overdive Auto Task + Daily Check-in (Support Multi Wallet & Proxies)  
 ✅ AIDA Auto Task Bot (Complete all tasks except Invite Friends)  
+✅ Dreamer Auto Spin & Daily Check-in  
 ✅ Run scripts in the background using `screen` on VPS  
 
 ---
@@ -21,7 +22,7 @@ This script will help you get daily rewards from multiple platforms, including *
 git clone https://github.com/okeeajah/auto-daily-airdrop.git
 cd auto-daily-airdrop
 
-npm install axios fs ethers path node-cron readline https-proxy-agent socks-proxy-agent crypto
+npm install axios fs ethers path node-cron readline https-proxy-agent socks-proxy-agent chalk@4 cli-table
 ```
 
 ---
@@ -139,10 +140,37 @@ node reff.js
 
 ---
 
+### **8️⃣ Dreamer Auto Spin & Daily Check-in**  
+✅ **Auto Spin & Daily Check-in only (No Auto Task)**  
+
+**1. Add accounts**  
+```bash
+cd dreamer
+nano accounts.txt
+```
+- Format:  
+```txt
+uid|cookie
+```
+- Example:  
+```txt
+123456789|your-cookie-here
+```
+
+**2. Run Dreamer Auto Spin & Daily Check-in**  
+```bash
+screen -S dreamer
+node bot.js
+```
+
+---
+
 ## 🔥 Notes  
 - **Always use `screen`** to run bots on VPS  
 - **Make sure to enter valid tokens/wallets**  
 - **Proxies are required for Fun Overdive**  
 - **Twitter verification is needed for Overdive social tasks**  
+- **Dreamer requires `uid` and `cookie` format**  
+- **Dreamer Auto Spin & Daily Check-in menggunakan `node bot.js`**  
 
 🚀 **Enjoy your automated tasks!** 🚀
