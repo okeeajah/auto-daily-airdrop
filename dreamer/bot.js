@@ -14,7 +14,7 @@ if (fs.existsSync(accountsPath)) {
 
 const timezoneOffset = -420;
 const cooldownTime = 13 * 60 * 60 * 1000;
-const delayTime = 15000;
+const delayTime = 14000;
 
 const logWithStyle = (userId, message) => {
     console.log(`[🔥 ${userId}] ${message}`);
