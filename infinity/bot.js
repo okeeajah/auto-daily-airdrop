@@ -11,7 +11,7 @@ const API_BASE_URL = 'https://api.infinityg.ai/api/v1';
  * Formats the API response to standardize success messages.
  */
 function formatResponse(response) {
-    if (response.code === '90000' && response.message === '成功') {
+    if (response.code === '90000' && response.message === 'æˆåŠŸ') {
         return {
             ...response,
             message: 'Success',
@@ -28,11 +28,11 @@ async function dailyCheckIn(api) {
     try {
         const response = await api.post('/task/checkIn/');
         const formattedResponse = formatResponse(response.data);
-        console.log(chalk.blue('[INFO] 🔹 Melakukan check-in harian...'));
-        console.log(chalk.green('[SUCCESS] ✅ Daily check-in berhasil!'));
+        console.log(chalk.blue('[INFO] ðŸ”¹ Melakukan check-in harian...'));
+        console.log(chalk.green('[SUCCESS] âœ… Daily check-in berhasil!'));
         return formattedResponse;
     } catch (error) {
-        console.error(chalk.red('[ERROR] ❌ Check-in error:', error.response?.data || error.message));
+        console.error(chalk.red('[ERROR] âŒ Check-in error:', error.response?.data || error.message));
     }
 }
 
@@ -43,10 +43,10 @@ async function getTaskList(api) {
     try {
         const response = await api.post('/task/list');
         const formattedResponse = formatResponse(response.data);
-        console.log(chalk.blue('[INFO] 🔹 Mengambil daftar tugas...'));
+        console.log(chalk.blue('[INFO] ðŸ”¹ Mengambil daftar tugas...'));
         return formattedResponse;
     } catch (error) {
-        console.error(chalk.red('[ERROR] ❌ Get task list error:', error.response?.data || error.message));
+        console.error(chalk.red('[ERROR] âŒ Get task list error:', error.response?.data || error.message));
         return null;
     }
 }
@@ -58,11 +58,11 @@ async function completeTask(api, taskId, taskName) {
     try {
         const response = await api.post('/task/complete', { taskId });
         const formattedResponse = formatResponse(response.data);
-        console.log(chalk.blue(`[INFO] 🔹 Menyelesaikan tugas: ${taskName} (ID: ${taskId})`));
-        console.log(chalk.green('[SUCCESS] ✅ Tugas selesai!'));
+        console.log(chalk.blue(`[INFO] ðŸ”¹ Menyelesaikan tugas: ${taskName} (ID: ${taskId})`));
+        console.log(chalk.green('[SUCCESS] âœ… Tugas selesai!'));
         return formattedResponse;
     } catch (error) {
-        console.error(chalk.red(`[ERROR] ❌ Complete task ${taskId} error:`, error.response?.data || error.message));
+        console.error(chalk.red(`[ERROR] âŒ Complete task ${taskId} error:`, error.response?.data || error.message));
         return null;
     }
 }
@@ -74,11 +74,11 @@ async function claimTask(api, taskId, taskName) {
     try {
         const response = await api.post('/task/claim', { taskId });
         const formattedResponse = formatResponse(response.data);
-        console.log(chalk.blue(`[INFO] 🔹 Mengklaim tugas: ${taskName} (ID: ${taskId})`));
-        console.log(chalk.green('[SUCCESS] ✅ Hadiah berhasil diklaim!'));
+        console.log(chalk.blue(`[INFO] ðŸ”¹ Mengklaim tugas: ${taskName} (ID: ${taskId})`));
+        console.log(chalk.green('[SUCCESS] âœ… Hadiah berhasil diklaim!'));
         return formattedResponse;
     } catch (error) {
-        console.error(chalk.red(`[ERROR] ❌ Claim task ${taskId} error:`, error.response?.data || error.message));
+        console.error(chalk.red(`[ERROR] âŒ Claim task ${taskId} error:`, error.response?.data || error.message));
         return null;
     }
 }
@@ -88,7 +88,7 @@ async function claimTask(api, taskId, taskName) {
  */
 async function processToken(token) {
     try {
-        console.log(chalk.yellow(`\n🔄 Memproses token: ${token.slice(-5)}`));
+        console.log(chalk.yellow(`\nðŸ”„ Memproses token: ${token.slice(-5)}`));
 
         // Create Axios instance with predefined headers
         const api = axios.create({
@@ -123,24 +123,24 @@ async function processToken(token) {
                         if (taskStatus === 3) {
                             await claimTask(api, taskId, taskName);
                             await sleep(2000);
-                        } else if (taskStatus === 0 && ["Follow X", "Explore the Ground and play a game", "Join Telegram Announcement", "Join Telegram Community", "Share a meme", "Share with your friends", "Quote tweet & tag 3 frens", "Share on X", "Like @Infinityg_ai's tweet", "Fill out the feedback form"].includes(taskName)) {
+                        } else if (taskStatus === 0 && ["Follow X", "Explore the Ground and play a game", "Join Telegram Announcement", "Join Telegram Community", "Follow Intern's X", "Share a meme", "Share with your friends", "Quote tweet & tag 3 frens", "Share on X", "Like @Infinityg_ai's tweet", "Fill out the feedback form"].includes(taskName)) {
                             await completeTask(api, taskId, taskName);
                             await sleep(2000);
                             await claimTask(api, taskId, taskName);
                             await sleep(2000);
                         } else {
-                            console.log(chalk.yellow(`[WARNING] ⏳ Tugas ${taskName} tidak bisa diproses (status: ${taskStatus}).`));
+                            console.log(chalk.yellow(`[WARNING] â³ Tugas ${taskName} tidak bisa diproses (status: ${taskStatus}).`));
                         }
                     }
                 }
             }
         } else {
-            console.log(chalk.blue('[INFO] 🔹 Tidak ada tugas yang ditemukan.'));
+            console.log(chalk.blue('[INFO] ðŸ”¹ Tidak ada tugas yang ditemukan.'));
         }
 
-        console.log(chalk.green(`[SUCCESS] ✅ Semua tugas selesai untuk token ${token.slice(-5)}`));
+        console.log(chalk.green(`[SUCCESS] âœ… Semua tugas selesai untuk token ${token.slice(-5)}`));
     } catch (error) {
-        console.error(chalk.red(`[ERROR] ❌ Error processing token: ${error.message}`));
+        console.error(chalk.red(`[ERROR] âŒ Error processing token: ${error.message}`));
     }
 }
 
@@ -149,7 +149,7 @@ async function processToken(token) {
  */
 async function runBot() {
     try {
-        console.log(chalk.blue('[INFO] 🚀 Memulai bot InfinityG...'));
+        console.log(chalk.blue('[INFO] ðŸš€ Memulai bot InfinityG...'));
 
         // Read tokens from file, split by newline, trim each, and filter out empty tokens
         const tokens = fs.readFileSync('token.txt', 'utf8')
@@ -161,7 +161,7 @@ async function runBot() {
             throw new Error('Tidak ada token yang ditemukan di token.txt. Silakan tambahkan token ke file.');
         }
 
-        console.log(chalk.blue(`[INFO] 🔍 Ditemukan ${tokens.length} token. Mulai proses...`));
+        console.log(chalk.blue(`[INFO] ðŸ” Ditemukan ${tokens.length} token. Mulai proses...`));
 
         // Process each token
         for (let i = 0; i < tokens.length; i++) {
@@ -170,9 +170,9 @@ async function runBot() {
             await sleep(5000); // Add delay between token processing
         }
 
-        console.log(chalk.green('[SUCCESS] ✅ Semua token telah diproses dengan sukses!'));
+        console.log(chalk.green('[SUCCESS] âœ… Semua token telah diproses dengan sukses!'));
     } catch (error) {
-        console.error(chalk.red('[ERROR] ❌ Bot error:', error.message));
+        console.error(chalk.red('[ERROR] âŒ Bot error:', error.message));
     }
 }
 
@@ -195,12 +195,12 @@ async function runBotWithCountdown() {
 
         const twelveHours = 12 * 60 * 60 * 1000;
         let timeRemaining = twelveHours;
-        console.log(chalk.cyan(`\n⏳ Menunggu ${formatTimeRemaining(timeRemaining)} sebelum run berikutnya`));
+        console.log(chalk.cyan(`\nâ³ Menunggu ${formatTimeRemaining(timeRemaining)} sebelum run berikutnya`));
 
         // Update countdown every second
         const countdownInterval = setInterval(() => {
             timeRemaining -= 1000;
-            process.stdout.write(chalk.cyan(`\r⏳ Menunggu ${formatTimeRemaining(timeRemaining)} sebelum run berikutnya`));
+            process.stdout.write(chalk.cyan(`\râ³ Menunggu ${formatTimeRemaining(timeRemaining)} sebelum run berikutnya`));
 
             if (timeRemaining <= 0) {
                 clearInterval(countdownInterval);
@@ -213,5 +213,5 @@ async function runBotWithCountdown() {
 }
 
 // Start the bot with daily check-in and tasks
-console.log(chalk.blue('[INFO] 🚀 Starting bot with daily check-in and tasks...'));
+console.log(chalk.blue('[INFO] ðŸš€ Starting bot with daily check-in and tasks...'));
 runBotWithCountdown();
